@@ -10,6 +10,7 @@ console.log(`[DataCacheHandler] Using cache type: ${cacheType}`);
 let handler;
 
 if (cacheType === "redis") {
+  // Redis/Valkey handler (using ioredis for consistency)
   const Redis = (await import("ioredis")).default;
   const { createRedisDataCacheHandler } = await import(
     "@mrjasonroy/cache-components-cache-handler"
@@ -26,6 +27,7 @@ if (cacheType === "redis") {
     console.log("[Redis] Connected successfully to", url);
   });
 
+  // Wrap ioredis to provide node-redis compatible API
   const redis = {
     get: (key) => ioredisClient.get(key),
     set: (key, value, ...args) => {
@@ -51,6 +53,7 @@ if (cacheType === "redis") {
     debug: process.env.CACHE_DEBUG === "true",
   });
 } else if (cacheType === "elasticache") {
+  // ElastiCache handler (password-based auth only)
   const Redis = (await import("ioredis")).default;
   const { createRedisDataCacheHandler } = await import(
     "@mrjasonroy/cache-components-cache-handler"
@@ -66,6 +69,7 @@ if (cacheType === "redis") {
   const config = {
     host: endpoint,
     port,
+    // TLS enabled by default for ElastiCache (disable explicitly with "false")
     tls: process.env.ELASTICACHE_TLS !== "false" ? {} : undefined,
     connectTimeout: 10000,
     retryStrategy: (times) => {
@@ -77,6 +81,7 @@ if (cacheType === "redis") {
     },
   };
 
+  // Password-based authentication
   if (process.env.ELASTICACHE_AUTH_TOKEN) {
     console.log("[ElastiCache] Using auth token authentication");
     config.password = process.env.ELASTICACHE_AUTH_TOKEN;
@@ -94,6 +99,7 @@ if (cacheType === "redis") {
     console.log("[ElastiCache] Connected successfully to", endpoint);
   });
 
+  // Wrap ioredis to provide node-redis compatible API
   const redis = {
     get: (key) => ioredisClient.get(key),
     set: (key, value, ...args) => {
@@ -124,7 +130,7 @@ if (cacheType === "redis") {
   );
 
   handler = createMemoryDataCacheHandler({
-    maxSize: 100 * 1024 * 1024,
+    maxSize: 100 * 1024 * 1024,  // 100MB
     debug: process.env.CACHE_DEBUG === "true",
   });
 
