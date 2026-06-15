@@ -130,7 +130,7 @@ if (cacheType === "redis") {
   );
 
   handler = createMemoryDataCacheHandler({
-    maxSize: 100 * 1024 * 1024,  // 100MB
+    maxSize: 100 * 1024 * 1024, // 100MB
     debug: process.env.CACHE_DEBUG === "true",
   });
 
