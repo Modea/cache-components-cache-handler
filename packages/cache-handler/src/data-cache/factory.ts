@@ -31,7 +31,6 @@ function createRedisAdapter(redis: import("ioredis").default): RedisClient {
   return {
     get: (key) => redis.get(key),
     set: (key, value, ...args) => {
-      // node-redis style: set(key, value, { EX: seconds })
       const opts = args[0] as Record<string, unknown> | undefined;
       if (opts && typeof opts === "object" && typeof opts.EX === "number") {
         return redis.set(key, value, "EX", opts.EX) as Promise<unknown>;
@@ -42,8 +41,8 @@ function createRedisAdapter(redis: import("ioredis").default): RedisClient {
     exists: (...keys) => redis.exists(...keys),
     ttl: (key) => redis.ttl(key),
     hGet: (key, field) => redis.hget(key, field),
-    hSet: (key, field, value) => redis.hset(key, field, value) as Promise<unknown>,
-    hGetAll: (key) => redis.hgetall(key),
+    hSet: (key, field, value) => redis.hset(key, field, value),
+    hGetAll: (key) => redis.hgetall(key).then((r) => r ?? {}),
   };
 }
 
