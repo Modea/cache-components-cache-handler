@@ -30,13 +30,19 @@ if (cacheType === "redis") {
   // Wrap ioredis to provide node-redis compatible API
   const redis = {
     get: (key) => ioredisClient.get(key),
-    set: (key, value, ...args) => ioredisClient.set(key, value, ...args),
+    set: (key, value, ...args) => {
+      const opts = args[0];
+      if (opts && typeof opts === "object" && typeof opts.EX === "number") {
+        return ioredisClient.set(key, value, "EX", opts.EX);
+      }
+      return ioredisClient.set(key, value);
+    },
     del: (...keys) => ioredisClient.del(...keys),
     exists: (...keys) => ioredisClient.exists(...keys),
     ttl: (key) => ioredisClient.ttl(key),
     hGet: (key, field) => ioredisClient.hget(key, field),
     hSet: (key, field, value) => ioredisClient.hset(key, field, value),
-    hGetAll: (key) => ioredisClient.hgetall(key),
+    hGetAll: (key) => ioredisClient.hgetall(key).then((r) => r ?? {}),
   };
 
   handler = createRedisDataCacheHandler({
@@ -96,13 +102,19 @@ if (cacheType === "redis") {
   // Wrap ioredis to provide node-redis compatible API
   const redis = {
     get: (key) => ioredisClient.get(key),
-    set: (key, value, ...args) => ioredisClient.set(key, value, ...args),
+    set: (key, value, ...args) => {
+      const opts = args[0];
+      if (opts && typeof opts === "object" && typeof opts.EX === "number") {
+        return ioredisClient.set(key, value, "EX", opts.EX);
+      }
+      return ioredisClient.set(key, value);
+    },
     del: (...keys) => ioredisClient.del(...keys),
     exists: (...keys) => ioredisClient.exists(...keys),
     ttl: (key) => ioredisClient.ttl(key),
     hGet: (key, field) => ioredisClient.hget(key, field),
     hSet: (key, field, value) => ioredisClient.hset(key, field, value),
-    hGetAll: (key) => ioredisClient.hgetall(key),
+    hGetAll: (key) => ioredisClient.hgetall(key).then((r) => r ?? {}),
   };
 
   handler = createRedisDataCacheHandler({
@@ -113,7 +125,6 @@ if (cacheType === "redis") {
     debug: process.env.CACHE_DEBUG === "true",
   });
 } else {
-  // Memory handler (default)
   const { createMemoryDataCacheHandler } = await import(
     "@mrjasonroy/cache-components-cache-handler"
   );

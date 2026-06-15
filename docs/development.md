@@ -31,6 +31,7 @@ pnpm dev              # Start all apps in dev mode
 pnpm build            # Build all packages
 pnpm test             # Run all tests
 pnpm test:e2e         # Run Playwright e2e tests
+pnpm setup:e2e        # Setup Playwright e2e tests
 
 # Code Quality
 pnpm lint             # Check for linting issues
